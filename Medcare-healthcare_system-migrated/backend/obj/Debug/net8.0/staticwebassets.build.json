@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "qUAr4/VkIEgKo9465iRB2pwPL8W+UjcZoBStxmiuxMs=",
+  "Source": "MedCare.Api",
+  "BasePath": "_content/MedCare.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

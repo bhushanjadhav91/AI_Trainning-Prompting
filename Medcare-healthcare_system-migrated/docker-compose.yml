@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: medcare_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: medcare
+      POSTGRES_USER: medcare
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-MedCarePass123}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medcare"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: medcare_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: "http://+:8080"
+      DATABASE_URL: "Host=postgres;Database=medcare;Username=medcare;Password=${DB_PASSWORD:-MedCarePass123}"
+      JWT_SECRET: "${JWT_SECRET:-ChangeThisToASecureRandomStringInProduction32Chars!}"
+      FRONTEND_URL: "http://localhost:4200"
+    volumes:
+      - uploads:/app/uploads
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --spider http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build: ./frontend
+    container_name: medcare_frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "4200:80"
+
+volumes:
+  pgdata:
+  uploads:
